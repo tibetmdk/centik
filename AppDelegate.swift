@@ -11,8 +11,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let collapsedHeight: CGFloat = 20          // Kapalıyken yükseklik
     let collapsedWidth: CGFloat  = 120        // Kapalıyken genişlik (çentikten küçük)
 
-    let expandedHeight: CGFloat  = 180        // Açıkken yükseklik
-    let expandedWidth: CGFloat   = 520        // Açıkken genişlik
+    let expandedHeight: CGFloat  = 150        // Açıkken yükseklik
+    let expandedWidth: CGFloat   = 480        // Açıkken genişlik
 
     let topOffset: CGFloat = 2
     // Menü bar alanının İÇİNE girmek için küçük offset
@@ -89,54 +89,65 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         blurView.layer?.backgroundColor =
             NSColor.black.withAlphaComponent(0.25).cgColor
         
-        //MARK: - Title
-        let titleLabel = NSTextField(labelWithString: "Title")
-        titleLabel.font = NSFont.systemFont(ofSize: 14, weight: .semibold)
-        titleLabel.textColor = NSColor.white
-        titleLabel.alignment = .center
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        // Auto Layout kullanacağız
+        //MARK: - TOP CONTAINER
+        
+        let topContainer = NSView()
+        topContainer.wantsLayer = true
+        topContainer.layer?.backgroundColor =
+            NSColor.black.withAlphaComponent(1).cgColor
 
-        blurView.addSubview(titleLabel)
-        // Yazıyı blur view’ın içine ekle
+        topContainer.translatesAutoresizingMaskIntoConstraints = false
+        // 🔴 Auto Layout’a teslim
 
-        NSLayoutConstraint.activate([
-            titleLabel.leadingAnchor.constraint(
-                equalTo: blurView.leadingAnchor,
-                constant: 16
-            ),
-
-            titleLabel.topAnchor.constraint(
-                equalTo: blurView.topAnchor,
-                constant: 30
-            )
-            // Çentiğin ALTINDAN başlasın
-        ])
-        //MARK: - buton
-        let testButton = NSButton(title: "Tıkla", target: nil, action: nil)
-        // Basit bir buton
-
-        testButton.bezelStyle = .rounded
-        // Yuvarlak kenarlı buton
-
-        testButton.font = NSFont.systemFont(ofSize: 13)
-        // Yazı boyutu
-
-        testButton.target = self
-        // Tıklanınca bu sınıf (AppDelegate) cevap versin
-
-        testButton.action = #selector(testButtonClicked)
-        // Tıklanınca çağrılacak fonksiyon
-
-        testButton.translatesAutoresizingMaskIntoConstraints = false
-
-        blurView.addSubview(testButton)
+        blurView.addSubview(topContainer)
 
         NSLayoutConstraint.activate([
-            testButton.leadingAnchor.constraint(equalTo: blurView.leadingAnchor, constant: 30),
-            testButton.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20)
+            // ÜSTE YAPIŞ
+            topContainer.topAnchor.constraint(equalTo: blurView.topAnchor),
+
+            // SOL & SAĞI DOLDUR
+            topContainer.leadingAnchor.constraint(equalTo: blurView.leadingAnchor),
+            topContainer.trailingAnchor.constraint(equalTo: blurView.trailingAnchor),
+
+            // SABİT YÜKSEKLİK (örnek: collapse alanı)
+            topContainer.heightAnchor.constraint(equalTo: blurView.heightAnchor, multiplier: 0.18)
         ])
         
+        // MARK: - 2 MID CONTAINER
+        
+        let midContainer = NSView()
+        midContainer.wantsLayer = true
+        midContainer.layer?.backgroundColor =
+        NSColor.red.withAlphaComponent(1).cgColor
+        
+        midContainer.translatesAutoresizingMaskIntoConstraints = false
+        
+        blurView.addSubview(midContainer)
+        
+        NSLayoutConstraint.activate([
+            midContainer.topAnchor.constraint(equalTo: topContainer.bottomAnchor),
+            midContainer.leadingAnchor.constraint(equalTo: blurView.leadingAnchor),
+            midContainer.trailingAnchor.constraint(equalTo: blurView.trailingAnchor),
+            midContainer.heightAnchor.constraint(equalTo: blurView.heightAnchor, multiplier: 0.64)
+        ])
+        
+        //MARK: - 2 BOTTOM CONTAINER
+        
+        let bottomContainer = NSView()
+        bottomContainer.wantsLayer = true
+        bottomContainer.layer?.backgroundColor =
+        NSColor.black.withAlphaComponent(1).cgColor
+        
+        bottomContainer.translatesAutoresizingMaskIntoConstraints = false
+        
+        blurView.addSubview(bottomContainer)
+        
+        NSLayoutConstraint.activate([
+            bottomContainer.topAnchor.constraint(equalTo: midContainer.bottomAnchor),
+            bottomContainer.leadingAnchor.constraint(equalTo: blurView.leadingAnchor),
+            bottomContainer.trailingAnchor.constraint(equalTo: blurView.trailingAnchor),
+            bottomContainer.heightAnchor.constraint(equalTo: blurView.heightAnchor, multiplier: 0.18)
+        ])
 
         // MARK: - TRACKING VIEW (Mouse Event’ler)
         let trackingView = TrackingView(frame: blurView.bounds)
