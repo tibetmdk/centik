@@ -108,7 +108,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // TOP
         let top = NSView()
         top.wantsLayer = true
-        top.layer?.backgroundColor = NSColor.black.cgColor
+        top.layer?.backgroundColor = NSColor.clear.cgColor
         top.translatesAutoresizingMaskIntoConstraints = false
         blurView.addSubview(top)
 
@@ -122,7 +122,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // MID
         let mid = NSView()
         mid.wantsLayer = true
-        mid.layer?.backgroundColor = NSColor.red.cgColor
+        mid.layer?.backgroundColor = NSColor.clear.cgColor
         mid.translatesAutoresizingMaskIntoConstraints = false
         blurView.addSubview(mid)
 
@@ -136,14 +136,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // MID1
         let mid1 = NSView()
         mid1.wantsLayer = true
-        mid1.layer?.backgroundColor = NSColor.blue.cgColor
+        mid1.layer?.backgroundColor = NSColor.clear.cgColor
         mid1.translatesAutoresizingMaskIntoConstraints = false
         mid.addSubview(mid1)
 
         NSLayoutConstraint.activate([
             mid1.topAnchor.constraint(equalTo: mid.topAnchor, constant: 12),
             mid1.leadingAnchor.constraint(equalTo: mid.leadingAnchor),
-            mid1.bottomAnchor.constraint(equalTo: mid.bottomAnchor, constant: -12),
+            mid1.bottomAnchor.constraint(equalTo: mid.bottomAnchor),
             mid1.widthAnchor.constraint(equalTo: mid.widthAnchor, multiplier: 0.5)
         ])
 
@@ -162,7 +162,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // BOTTOM
         let bottom = NSView()
         bottom.wantsLayer = true
-        bottom.layer?.backgroundColor = NSColor.black.cgColor
+        bottom.layer?.backgroundColor = NSColor.clear.cgColor
         bottom.translatesAutoresizingMaskIntoConstraints = false
         blurView.addSubview(bottom)
 

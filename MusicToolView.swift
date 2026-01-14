@@ -1,145 +1,187 @@
 import Cocoa
 // Cocoa = macOS AppKit dünyasının ana framework’ü
-// NSView, NSButton, NSTextField gibi UI elemanları burada
 
 final class MusicToolView: NSView {
-    // final = Bu class’tan miras alınamaz
-    // MusicToolView = sadece bu işi yapacak, genişletilmeyecek bir UI parçası
 
     // MARK: - UI Elemanları
 
+    private let albumImageView = NSImageView()
+    // Albüm kapağını gösterecek image view
+
     private let titleLabel = NSTextField(labelWithString: "One Kiss /w Shea")
-    // Şarkı adını göstermek için label
-    // labelWithString → editable olmayan, sadece görüntü amaçlı text
+    // Şarkı adı label’ı (editable değil)
+
+    private let progressBar = NSProgressIndicator()
+    // Müzik ilerleme çubuğu
 
     private let previousButton = NSButton(title: "⏮", target: nil, action: nil)
-    // Önceki şarkı butonu (şimdilik sadece UI)
-
     private let playPauseButton = NSButton(title: "▶", target: nil, action: nil)
-    // Play / Pause butonu
-
     private let nextButton = NSButton(title: "⏭", target: nil, action: nil)
-    // Sonraki şarkı butonu
 
     private var isPlaying = false
-    // Müzik şu anda çalıyor mu bilgisini tutar
-    // false = duruyor, true = çalıyor
+    // Şu an müzik çalıyor mu?
 
     // MARK: - Init
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
-        // NSView’ın kendi init’ini çağırıyoruz
 
         setupView()
-        // Görsel ayarlar (renk, font vs.)
-
         setupLayout()
-        // Auto Layout constraint’leri
-
         setupActions()
-        // Butonlara tıklama davranışı
     }
 
     required init?(coder: NSCoder) {
-        // Storyboard / XIB kullanmadığımız için bunu kapatıyoruz
         fatalError("init(coder:) has not been implemented")
     }
 
     // MARK: - View Ayarları
 
     private func setupView() {
-        wantsLayer = true
-        // Bu view layer kullansın (arka plan, animasyon vs.)
 
+        wantsLayer = true
         layer?.backgroundColor = NSColor.clear.cgColor
-        // Arka planı şeffaf
-        // Blur zaten parent view’dan geliyor
+        // Arka planı şeffaf (blur parent’tan geliyor)
+
+        // --- ALBUM IMAGE ---
+
+        albumImageView.image = NSImage(named: "album_art")
+        // Assets.xcassets içindeki albüm görseli
+
+        albumImageView.imageScaling = .scaleAxesIndependently
+        // Görsel alanı doldursun, oranı bozmasın
+
+        albumImageView.wantsLayer = true
+        albumImageView.layer?.cornerRadius = 8
+        albumImageView.layer?.masksToBounds = true
+        // Yuvarlatılmış köşeler
+
+        // --- TITLE LABEL ---
 
         titleLabel.font = NSFont.systemFont(ofSize: 13, weight: .medium)
-        // Şarkı adı için font ayarı
-
         titleLabel.textColor = .white
-        // Yazı rengi beyaz
-
         titleLabel.lineBreakMode = .byTruncatingTail
-        // Yazı uzun olursa "..." ile kessin
+
+        // --- PROGRESS BAR ---
+
+        progressBar.isIndeterminate = false
+        // Determinate → yüzde bazlı çalışır
+
+        progressBar.minValue = 0
+        progressBar.maxValue = 100
+        progressBar.doubleValue = 35
+        // Şimdilik örnek bir değer (%35)
+
+        progressBar.controlTint = .defaultControlTint
+        progressBar.style = .bar
+        // Düz, sade progress bar
+
+        // --- BUTTON STYLES ---
 
         previousButton.bezelStyle = .texturedRounded
         playPauseButton.bezelStyle = .texturedRounded
         nextButton.bezelStyle = .texturedRounded
-        // macOS’e uygun yuvarlatılmış buton stili
     }
 
-    // MARK: - Layout (Constraint’ler)
+    // MARK: - Layout (Auto Layout)
 
     private func setupLayout() {
+
+        // Auto Layout kullanacağımız için frame tabanlı yerleşimi kapatıyoruz
+        albumImageView.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        progressBar.translatesAutoresizingMaskIntoConstraints = false
         previousButton.translatesAutoresizingMaskIntoConstraints = false
         playPauseButton.translatesAutoresizingMaskIntoConstraints = false
         nextButton.translatesAutoresizingMaskIntoConstraints = false
-        // Auto Layout kullanacağımızı söylüyoruz
-        // Frame bazlı yerleşimi kapatıyoruz
 
+        // Subview’ları ekle
+        addSubview(albumImageView)
         addSubview(titleLabel)
+        addSubview(progressBar)
         addSubview(previousButton)
         addSubview(playPauseButton)
         addSubview(nextButton)
-        // Elemanları MusicToolView’ın içine ekliyoruz
 
         NSLayoutConstraint.activate([
-            // --- TITLE LABEL ---
 
-            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 10),
-            // Title, MusicToolView’ın üstünden 10px aşağıda olsun
+            // MARK: - ALBUM IMAGE (EN ÜST SOL)
 
-            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            // Soldan 16px boşluk bırak
+            albumImageView.topAnchor.constraint(equalTo: topAnchor, constant: 6),
+            albumImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 30),
+            albumImageView.widthAnchor.constraint(equalToConstant: 44),
+            albumImageView.heightAnchor.constraint(equalToConstant: 44),
 
-            titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            // Sağdan 16px boşluk bırak
+            // MARK: - TITLE (ALBÜM FOTOĞRAFININ SAĞI)
 
-            // --- PLAY / PAUSE BUTTON ---
+            titleLabel.leadingAnchor.constraint(
+                equalTo: albumImageView.trailingAnchor,
+                constant: 10
+            ),
 
-            playPauseButton.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
-            // Play/Pause, title’ın altına 12px boşlukla gelsin
+            titleLabel.centerYAnchor.constraint(equalTo: albumImageView.centerYAnchor),
+
+            titleLabel.trailingAnchor.constraint(
+                equalTo: trailingAnchor,
+                constant: -12
+            ),
+
+            // MARK: - PROGRESS BAR (ALBÜM + TITLE ALTINDA)
+
+            progressBar.topAnchor.constraint(
+                equalTo: albumImageView.bottomAnchor,
+                constant: 6
+            ),
+
+            progressBar.leadingAnchor.constraint(
+                equalTo: leadingAnchor,
+                constant: 12
+            ),
+
+            progressBar.trailingAnchor.constraint(
+                equalTo: trailingAnchor,
+                constant: -12
+            ),
+
+            // MARK: - BUTTONS (EN ALTTA ORTALI)
+
+            playPauseButton.topAnchor.constraint(
+                equalTo: progressBar.bottomAnchor,
+                constant: 4
+            ),
 
             playPauseButton.centerXAnchor.constraint(equalTo: centerXAnchor),
-            // Yatayda tam ortaya hizala
 
-            // --- PREVIOUS BUTTON ---
+            previousButton.centerYAnchor.constraint(
+                equalTo: playPauseButton.centerYAnchor
+            ),
 
-            previousButton.centerYAnchor.constraint(equalTo: playPauseButton.centerYAnchor),
-            // Önceki buton, Play/Pause ile aynı hizada olsun
+            previousButton.trailingAnchor.constraint(
+                equalTo: playPauseButton.leadingAnchor,
+                constant: -14
+            ),
 
-            previousButton.trailingAnchor.constraint(equalTo: playPauseButton.leadingAnchor, constant: -12),
-            // Play/Pause’un soluna 12px boşlukla koy
+            nextButton.centerYAnchor.constraint(
+                equalTo: playPauseButton.centerYAnchor
+            ),
 
-            // --- NEXT BUTTON ---
-
-            nextButton.centerYAnchor.constraint(equalTo: playPauseButton.centerYAnchor),
-            // Sonraki buton da aynı hizada olsun
-
-            nextButton.leadingAnchor.constraint(equalTo: playPauseButton.trailingAnchor, constant: 12)
-            // Play/Pause’un sağına 12px boşlukla koy
+            nextButton.leadingAnchor.constraint(
+                equalTo: playPauseButton.trailingAnchor,
+                constant: 14
+            ),
+            
         ])
     }
 
-    // MARK: - Actions (Buton Davranışları)
+    // MARK: - Actions
 
     private func setupActions() {
         playPauseButton.target = self
-        // Butona basıldığında bu class hedef alınsın
-
         playPauseButton.action = #selector(togglePlayPause)
-        // Butona basıldığında togglePlayPause fonksiyonu çağrılsın
     }
 
     @objc private func togglePlayPause() {
         isPlaying.toggle()
-        // true ↔ false arasında geçiş yap
-
         playPauseButton.title = isPlaying ? "⏸" : "▶"
-        // Çalıyorsa pause ikonu, değilse play ikonu göster
     }
 }
